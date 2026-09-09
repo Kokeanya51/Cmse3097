@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MACOKI Patient Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #2c3e50;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .navbar-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-info {
+            font-size: 0.9rem;
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            background: white;
+            width: 250px;
+            padding: 2rem 0;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            left: 0;
+            top: 65px;
+            height: calc(100vh - 65px);
+            overflow-y: auto;
+            z-index: 50;
+        }
+
+        .sidebar.hidden {
+            display: none;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-item {
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: #2c3e50;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: #f0f4f8;
+            border-left-color: #2a5298;
+            color: #2a5298;
+        }
+
+        .nav-item.active {
+            background: #e8f4f8;
+            border-left-color: #2a5298;
+            color: #2a5298;
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            margin-left: 250px;
+            margin-top: 65px;
+            padding: 2rem;
+            flex: 1;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* LOGIN */
+        .login-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .login-card {
+            background: white;
+            padding: 3rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            color: #1e3c72;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: #7f8c8d;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* BUTTONS */
+        .btn-primary,
+        .btn-primary-full {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-primary-full {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-primary:hover,
+        .btn-primary-full:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary,
+        .btn-secondary-full {
+            background: #ecf0f1;
+            color: #2c3e50;
+            border: 1px solid #bdc3c7;
+            padding: 0.7rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-right: 0.5rem;
+        }
+
+        .btn-secondary-full {
+            width: 100%;
+            justify-content: center;
+            margin-top: 0.5rem;
+            margin-right: 0;
+        }
+
+        .btn-secondary:hover {
+            background: #d5dbdb;
+        }
+
+        .btn-back {
+            background: none;
+            border: none;
+            color: #2a5298;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .btn-back:hover {
+            color: #667eea;
+            text-decoration: underline;
+        }
+
+        /* MESSAGES */
+        .error-message,
+        .success-message,
+        .loading-message {
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+        }
+
+        .error-message {
+            background: #ffe6e6;
+            color: #c0392b;
+            border-left-color: #c0392b;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            border-left-color: #28a745;
+        }
+
+        .loading-message {
+            background: #e2f0ff;
+            color: #004085;
+            border-left-color: #004085;
+        }
+
+        /* PAGES */
+        .page h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #1e3c72;
+        }
+
+        .page > p {
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+        }
+
+        /* DASHBOARD */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2a5298;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        /* SEARCH */
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .search-box input {
+            flex: 1;
+            border: 1px solid #bdc3c7;
+            padding: 0.5rem;
+            font-size: 1rem;
+            border-radius: 3px;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+
+        /* PATIENT LIST */
+        .patient-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .patient-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .patient-card:hover {
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .patient-card-content {
+            flex: 1;
+        }
+
+        .patient-card h3 {
+            margin-bottom: 0.5rem;
+            color: #1e3c72;
+        }
+
+        .patient-card p {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        /* PROFILE */
+        .patient-profile {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .profile-header {
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 1rem;
+        }
+
+        .profile-header h2 {
+            color: #1e3c72;
+        }
+
+        .patient-id {
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        .profile-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .profile-section h3 {
+            color: #2a5298;
+            margin-bottom: 1rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .visit-record,
+        .followup-record {
+            background: white;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+            border-left: 4px solid #2a5298;
+        }
+
+        /* VISITS */
+        .visits-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .visit-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid #3498db;
+        }
+
+        .visit-card h3 {
+            color: #1e3c72;
+            margin-bottom: 0.5rem;
+        }
+
+        .visit-card p {
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+
+        /* FOLLOW-UPS */
+        .followups-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .followup-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid #f39c12;
+        }
+
+        .followup-content {
+            flex: 1;
+        }
+
+        .followup-content h3 {
+            color: #1e3c72;
+            margin-bottom: 0.5rem;
+        }
+
+        .followup-content p {
+            margin-bottom: 0.3rem;
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        /* STATUS BADGES */
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .role-badge {
+            background: #e8f4f8;
+            color: #2a5298;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* TABLES */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .data-table thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .data-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .section h2 {
+            color: #1e3c72;
+            margin-bottom: 1.5rem;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 2rem;
+        }
+
+        .demo-credentials {
+            background: #e8f4f8;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #2c3e50;
+        }
+
+        .demo-credentials p {
+            margin: 0.3rem 0;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2a5298;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .sidebar {
+                width: 250px;
+                left: -250px;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .patient-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .followup-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        // ======================== API CONFIGURATION ========================
+        // Change this to your Django backend URL
+        const API_BASE_URL = 'http://localhost:8000/api';
+        let authToken = localStorage.getItem('authToken');
+
+        // ======================== STATE MANAGEMENT ========================
+        const state = {
+            currentUser: null,
+            sidebarOpen: true,
+            currentPage: 'login',
+            patients: [],
+            visits: [],
+            followUps: [],
+            users: [],
+            loading: false,
+            error: null
+        };
+
+        let selectedPatient = null;
+
+        // ======================== API FUNCTIONS ========================
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            const url = `${API_BASE_URL}${endpoint}`;
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+
+            if (authToken) {
+                headers['Authorization'] = `Token ${authToken}`;
+            }
+
+            try {
+                state.loading = true;
+                const response = await fetch(url, {
+                    method,
+                    headers,
+                    body: data ? JSON.stringify(data) : null,
+                });
+
+                if (response.status === 401) {
+                    logout();
+                    throw new Error('Unauthorized - Please login again');
+                }
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || `HTTP ${response.status}`);
+                }
+
+                const responseData = await response.json();
+                state.error = null;
+                return responseData;
+            } catch (error) {
+                state.error = error.message;
+                console.error('API Error:', error);
+                throw error;
+            } finally {
+                state.loading = false;
+            }
+        }
+
+        async function login(username, password) {
+            try {
+                const response = await apiCall('/auth/login/', 'POST', { username, password });
+                if (response.token) {
+                    authToken = response.token;
+                    localStorage.setItem('authToken', authToken);
+                    state.currentUser = response.user;
+                    state.currentPage = 'dashboard';
+                    await loadDashboardData();
+                    render();
+                    return true;
+                }
+            } catch (error) {
+                state.error = 'Invalid credentials';
+                return false;
+            }
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                authToken = null;
+                localStorage.removeItem('authToken');
+                state.currentUser = null;
+                state.currentPage = 'login';
+                render();
+            }
+        }
+
+        async function loadDashboardData() {
+            try {
+                const [patients, visits, followUps] = await Promise.all([
+                    apiCall('/patients/'),
+                    apiCall('/patients/1/visits/'),
+                    apiCall('/followups/')
+                ]);
+                state.patients = Array.isArray(patients) ? patients : patients.results || [];
+                state.visits = Array.isArray(visits) ? visits : visits.results || [];
+                state.followUps = Array.isArray(followUps) ? followUps : followUps.results || [];
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        async function loadPatients() {
+            try {
+                const data = await apiCall('/patients/');
+                state.patients = Array.isArray(data) ? data : data.results || [];
+            } catch (error) {
+                console.error('Error loading patients:', error);
+            }
+        }
+
+        async function addPatient(patient) {
+            try {
+                const newPatient = await apiCall('/patients/', 'POST', patient);
+                state.patients.push(newPatient);
+                return newPatient;
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        async function addVisit(visit) {
+            try {
+                const newVisit = await apiCall('/patients/1/visits/', 'POST', visit);
+                state.visits.push(newVisit);
+                return newVisit;
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        async function addFollowUp(followUp) {
+            try {
+                const newFollowUp = await apiCall('/followups/', 'POST', followUp);
+                state.followUps.push(newFollowUp);
+                return newFollowUp;
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        async function markFollowUpComplete(id) {
+            try {
+                await apiCall(`/followups/${id}/`, 'PATCH', { status: 'Completed' });
+                const followUp = state.followUps.find(f => f.id === id);
+                if (followUp) {
+                    followUp.status = 'Completed';
+                }
+                render();
+            } catch (error) {
+                console.error('Error marking follow-up complete:', error);
+            }
+        }
+
+        // ======================== UTILITY FUNCTIONS ========================
+        function goToPage(page) {
+            if (state.currentUser) {
+                state.currentPage = page;
+                state.sidebarOpen = false;
+                render();
+            }
+        }
+
+        function toggleSidebar() {
+            state.sidebarOpen = !state.sidebarOpen;
+            render();
+        }
+
+        // ======================== RENDER FUNCTIONS ========================
+        function renderLoginPage() {
+            return `
+                <div class="login-page">
+                    <div class="login-card">
+                        <div class="login-header">
+                            <h1>MACOKI APMS</h1>
+                            <p>Patient Management System</p>
+                        </div>
+                        ${state.error ? `<div class="error-message">${state.error}</div>` : ''}
+                        <form onsubmit="handleLogin(event)">
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input type="text" id="username" placeholder="Enter username" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" id="password" placeholder="Enter password" required>
+                            </div>
+                            <button type="submit" class="btn-primary-full">
+                                ${state.loading ? '<span class="spinner"></span>' : ''}
+                                Login
+                            </button>
+                        </form>
+                        <div class="demo-credentials">
+                            <p><strong>Note:</strong> Connect to your Django backend at ${API_BASE_URL}</p>
+                            <p>Make sure Django server is running on http://localhost:8000</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            await login(username, password);
+        }
+
+        function renderNavbar() {
+            return `
+                <div class="navbar">
+                    <div class="navbar-left">
+                        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+                        <h2 class="navbar-title">MACOKI APMS</h2>
+                    </div>
+                    <div class="navbar-right">
+                        <span class="user-info">${state.currentUser?.first_name || ''} ${state.currentUser?.last_name || ''}</span>
+                        <button class="btn-logout" onclick="logout()">Logout</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSidebar() {
+            let html = '<div class="sidebar' + (state.sidebarOpen ? ' open' : ' hidden') + '"><nav class="sidebar-nav">';
+            html += `<a class="nav-item" onclick="goToPage('dashboard')">📊 Dashboard</a>`;
+            html += `<a class="nav-item" onclick="goToPage('patients')">👥 Patients</a>`;
+            html += `<a class="nav-item" onclick="goToPage('new-patient')">➕ New Patient</a>`;
+            html += `<a class="nav-item" onclick="goToPage('visits')">📝 Visits</a>`;
+            html += `<a class="nav-item" onclick="goToPage('followups')">🔄 Follow-ups</a>`;
+            html += '</nav></div>';
+            return html;
+        }
+
+        function renderDashboard() {
+            const pendingFollowUps = state.followUps.filter(f => f.status === 'Pending');
+            const completedFollowUps = state.followUps.filter(f => f.status === 'Completed');
+
+            let html = `
+                <div class="page active">
+                    <h1>Dashboard</h1>
+                    <p>Welcome, ${state.currentUser?.first_name || 'User'}!</p>
+
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <div class="stat-number">${state.patients.length}</div>
+                            <div class="stat-label">Total Patients</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${state.visits.length}</div>
+                            <div class="stat-label">Total Visits</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${pendingFollowUps.length}</div>
+                            <div class="stat-label">Pending Follow-ups</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">${completedFollowUps.length}</div>
+                            <div class="stat-label">Completed Follow-ups</div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2>📋 Patients</h2>
+                        ${state.patients.length === 0 ? '<p class="no-data">No patients yet</p>' : `
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Patient ID</th>
+                                        <th>Name</th>
+                                        <th>Phone</th>
+                                        <th>Gender</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${state.patients.slice(0, 5).map(p => `
+                                        <tr>
+                                            <td>${p.patient_id}</td>
+                                            <td>${p.first_name} ${p.last_name}</td>
+                                            <td>${p.phone}</td>
+                                            <td>${p.gender}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        `}
+                    </div>
+                </div>
+            `;
+
+            return html;
+        }
+
+        function renderPatients() {
+            const searchTerm = document.getElementById('patientSearch')?.value || '';
+            const filteredPatients = state.patients.filter(p =>
+                (p.first_name + ' ' + p.last_name).toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (p.patient_id || '').includes(searchTerm) ||
+                (p.phone || '').includes(searchTerm)
+            );
+
+            let html = `
+                <div class="page active">
+                    <h1>Patient Records</h1>
+                    <div class="search-box">
+                        <span>🔍</span>
+                        <input type="text" id="patientSearch" placeholder="Search by name, ID, or phone..." onkeyup="render()">
+                    </div>
+            `;
+
+            if (selectedPatient) {
+                html += `
+                    <button class="btn-back" onclick="selectedPatient = null; render()">← Back</button>
+                    <div class="patient-profile">
+                        <div class="profile-header">
+                            <h2>${selectedPatient.first_name} ${selectedPatient.last_name}</h2>
+                            <p class="patient-id">ID: ${selectedPatient.patient_id}</p>
+                        </div>
+                        <div class="profile-section">
+                            <h3>Information</h3>
+                            <div class="info-grid">
+                                <div><strong>Phone:</strong> ${selectedPatient.phone}</div>
+                                <div><strong>Gender:</strong> ${selectedPatient.gender}</div>
+                                <div><strong>Address:</strong> ${selectedPatient.address || 'N/A'}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                if (filteredPatients.length === 0) {
+                    html += '<p class="no-data">No patients found</p>';
+                } else {
+                    html += '<div class="patient-list">';
+                    filteredPatients.forEach(patient => {
+                        html += `
+                            <div class="patient-card">
+                                <div class="patient-card-content">
+                                    <h3>${patient.patient_id} - ${patient.first_name} ${patient.last_name}</h3>
+                                    <p><strong>Gender:</strong> ${patient.gender}</p>
+                                    <p><strong>Phone:</strong> ${patient.phone}</p>
+                                </div>
+                                <button class="btn-secondary" onclick="selectedPatient = state.patients.find(p => p.id === ${patient.id}); render()">👁️ View</button>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+            }
+
+            html += '</div>';
+            return html;
+        }
+
+        function renderNewPatient() {
+            return `
+                <div class="page active">
+                    <h1>Register New Patient</h1>
+                    ${state.error ? `<div class="error-message">${state.error}</div>` : ''}
+                    <div id="patientSuccess"></div>
+
+                    <form class="form-card" onsubmit="handleNewPatient(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>First Name *</label>
+                                <input type="text" name="first_name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Last Name *</label>
+                                <input type="text" name="last_name" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Date of Birth</label>
+                                <input type="date" name="date_of_birth">
+                            </div>
+                            <div class="form-group">
+                                <label>Gender</label>
+                                <select name="gender">
+                                    <option>Male</option>
+                                    <option>Female</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Phone Number *</label>
+                            <input type="tel" name="phone" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Address</label>
+                            <textarea name="address" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Emergency Contact</label>
+                            <input type="text" name="emergency_contact">
+                        </div>
+
+                        <button type="submit" class="btn-primary-full">
+                            ${state.loading ? '<span class="spinner"></span>' : ''}
+                            Register Patient
+                        </button>
+                    </form>
+                </div>
+            `;
+        }
+
+        async function handleNewPatient(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const patient = {
+                first_name: formData.get('first_name'),
+                last_name: formData.get('last_name'),
+                date_of_birth: formData.get('date_of_birth'),
+                gender: formData.get('gender'),
+                phone: formData.get('phone'),
+                address: formData.get('address'),
+                emergency_contact: formData.get('emergency_contact')
+            };
+
+            try {
+                await addPatient(patient);
+                document.getElementById('patientSuccess').innerHTML = '<div class="success-message">Patient registered successfully!</div>';
+                event.target.reset();
+                setTimeout(() => {
+                    state.currentPage = 'patients';
+                    render();
+                }, 2000);
+            } catch (error) {
+                document.getElementById('patientSuccess').innerHTML = `<div class="error-message">${state.error}</div>`;
+            }
+        }
+
+        function renderVisits() {
+            const showForm = document.getElementById('showVisitForm')?.checked || false;
+
+            let html = `
+                <div class="page active">
+                    <h1>Patient Visits</h1>
+                    ${state.error ? `<div class="error-message">${state.error}</div>` : ''}
+                    <div id="visitSuccess"></div>
+
+                    <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; cursor: pointer;">
+                        <input type="checkbox" id="showVisitForm" onchange="render()">
+                        <button type="button" class="btn-primary">➕ New Visit</button>
+                    </label>
+            `;
+
+            if (showForm) {
+                html += `
+                    <form class="form-card" onsubmit="handleNewVisit(event)">
+                        <div class="form-group">
+                            <label>Select Patient *</label>
+                            <select name="patient_id" required>
+                                <option value="">-- Choose a patient --</option>
+                                ${state.patients.map(p => `<option value="${p.id}">${p.patient_id} - ${p.first_name} ${p.last_name}</option>`).join('')}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Reason for Visit *</label>
+                            <input type="text" name="reason" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Clinical Notes</label>
+                            <textarea name="clinical_notes" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Diagnosis</label>
+                            <input type="text" name="diagnosis">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Treatment/Management Plan</label>
+                            <textarea name="treatment_plan" rows="3"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-primary-full">
+                            ${state.loading ? '<span class="spinner"></span>' : ''}
+                            Record Visit
+                        </button>
+                        <button type="button" class="btn-secondary-full" onclick="document.getElementById('showVisitForm').checked = false; render()">Cancel</button>
+                    </form>
+                `;
+            }
+
+            html += '<div class="visits-list">';
+            if (state.visits.length === 0) {
+                html += '<p class="no-data">No visits recorded</p>';
+            } else {
+                state.visits.forEach(visit => {
+                    const patient = state.patients.find(p => p.id === visit.patient_id);
+                    html += `
+                        <div class="visit-card">
+                            <h3>${patient?.first_name} ${patient?.last_name}</h3>
+                            <p><strong>Date:</strong> ${visit.visit_date}</p>
+                            <p><strong>Reason:</strong> ${visit.reason}</p>
+                            <p><strong>Diagnosis:</strong> ${visit.diagnosis}</p>
+                        </div>
+                    `;
+                });
+            }
+            html += '</div></div>';
+
+            return html;
+        }
+
+        async function handleNewVisit(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const visit = {
+                patient_id: parseInt(formData.get('patient_id')),
+                reason: formData.get('reason'),
+                clinical_notes: formData.get('clinical_notes'),
+                diagnosis: formData.get('diagnosis'),
+                treatment_plan: formData.get('treatment_plan')
+            };
+
+            try {
+                await addVisit(visit);
+                document.getElementById('visitSuccess').innerHTML = '<div class="success-message">Visit recorded successfully!</div>';
+                document.getElementById('showVisitForm').checked = false;
+                setTimeout(() => render(), 1500);
+            } catch (error) {
+                document.getElementById('visitSuccess').innerHTML = `<div class="error-message">${state.error}</div>`;
+            }
+        }
+
+        function renderFollowUps() {
+            const showForm = document.getElementById('showFollowUpForm')?.checked || false;
+            const pendingFollowUps = state.followUps.filter(f => f.status === 'Pending');
+            const completedFollowUps = state.followUps.filter(f => f.status === 'Completed');
+
+            let html = `
+                <div class="page active">
+                    <h1>Follow-up Management</h1>
+                    ${state.error ? `<div class="error-message">${state.error}</div>` : ''}
+                    <div id="followupSuccess"></div>
+
+                    <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; cursor: pointer;">
+                        <input type="checkbox" id="showFollowUpForm" onchange="render()">
+                        <button type="button" class="btn-primary">➕ Schedule Follow-up</button>
+                    </label>
+            `;
+
+            if (showForm) {
+                html += `
+                    <form class="form-card" onsubmit="handleNewFollowUp(event)">
+                        <div class="form-group">
+                            <label>Select Patient *</label>
+                            <select id="followupPatient" name="patient_id" required>
+                                <option value="">-- Choose a patient --</option>
+                                ${state.patients.map(p => `<option value="${p.id}">${p.patient_id} - ${p.first_name} ${p.last_name}</option>`).join('')}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Follow-up Date *</label>
+                            <input type="date" name="follow_up_date" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Follow-up Notes *</label>
+                            <textarea name="notes" rows="3" required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-primary-full">
+                            ${state.loading ? '<span class="spinner"></span>' : ''}
+                            Schedule Follow-up
+                        </button>
+                        <button type="button" class="btn-secondary-full" onclick="document.getElementById('showFollowUpForm').checked = false; render()">Cancel</button>
+                    </form>
+                `;
+            }
+
+            html += `
+                <div class="section">
+                    <h2>⏰ Pending Follow-ups (${pendingFollowUps.length})</h2>
+                    <div class="followups-list">
+            `;
+
+            if (pendingFollowUps.length === 0) {
+                html += '<p class="no-data">No pending follow-ups</p>';
+            } else {
+                pendingFollowUps.forEach(fu => {
+                    const patient = state.patients.find(p => p.id === fu.patient_id);
+                    html += `
+                        <div class="followup-card">
+                            <div class="followup-content">
+                                <h3>${patient?.first_name} ${patient?.last_name}</h3>
+                                <p><strong>Date:</strong> ${fu.follow_up_date}</p>
+                                <p><strong>Notes:</strong> ${fu.notes}</p>
+                            </div>
+                            <button class="btn-secondary" onclick="markFollowUpComplete(${fu.id})">✓ Complete</button>
+                        </div>
+                    `;
+                });
+            }
+
+            html += `
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>✓ Completed Follow-ups (${completedFollowUps.length})</h2>
+                    <div class="followups-list">
+            `;
+
+            if (completedFollowUps.length === 0) {
+                html += '<p class="no-data">No completed follow-ups</p>';
+            } else {
+                completedFollowUps.forEach(fu => {
+                    const patient = state.patients.find(p => p.id === fu.patient_id);
+                    html += `
+                        <div class="followup-card">
+                            <div class="followup-content">
+                                <h3>${patient?.first_name} ${patient?.last_name}</h3>
+                                <p><strong>Date:</strong> ${fu.follow_up_date}</p>
+                                <p><strong>Notes:</strong> ${fu.notes}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            html += `
+                    </div>
+                </div>
+                </div>
+            `;
+
+            return html;
+        }
+
+        async function handleNewFollowUp(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const followUp = {
+                patient_id: parseInt(formData.get('patient_id')),
+                follow_up_date: formData.get('follow_up_date'),
+                notes: formData.get('notes')
+            };
+
+            try {
+                await addFollowUp(followUp);
+                document.getElementById('followupSuccess').innerHTML = '<div class="success-message">Follow-up scheduled successfully!</div>';
+                document.getElementById('showFollowUpForm').checked = false;
+                setTimeout(() => render(), 1500);
+            } catch (error) {
+                document.getElementById('followupSuccess').innerHTML = `<div class="error-message">${state.error}</div>`;
+            }
+        }
+
+        // ======================== MAIN RENDER ========================
+        function render() {
+            const app = document.getElementById('app');
+
+            if (!state.currentUser) {
+                app.innerHTML = renderLoginPage();
+                return;
+            }
+
+            let content = renderNavbar() + renderSidebar();
+
+            switch (state.currentPage) {
+                case 'dashboard':
+                    content += renderDashboard();
+                    break;
+                case 'patients':
+                    content += renderPatients();
+                    break;
+                case 'new-patient':
+                    content += renderNewPatient();
+                    break;
+                case 'visits':
+                    content += renderVisits();
+                    break;
+                case 'followups':
+                    content += renderFollowUps();
+                    break;
+                default:
+                    content += renderDashboard();
+            }
+
+            content += '</div>';
+            app.innerHTML = '<div class="container"><div class="main-content">' + content;
+        }
+
+        // Initial render
+        render();
+    </script>
+</body>
+</html>
